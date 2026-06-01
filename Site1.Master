@@ -1,0 +1,393 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site1.master.cs" Inherits="EHS_Construction_Management_System.Site1" %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Application</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        /* ── Reset & Base ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --sidebar-w:        240px;
+            --sidebar-w-closed:  60px;
+            --bg-body:          #f0f2f5;
+            --bg-sidebar:       #0f1117;
+            --bg-sidebar-hover: #1c1f2b;
+            --bg-active:        #2563eb;
+            --accent:           #2563eb;
+            --text-primary:     #f8fafc;
+            --text-muted:       #94a3b8;
+            --text-body:        #1e293b;
+            --border:           #1e2535;
+            --transition:       0.28s cubic-bezier(.4,0,.2,1);
+            --radius:           10px;
+            --header-h:         56px;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-body);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        #sidebar {
+            position: relative;
+            top: 0; left: 0; bottom: 0;
+            width: var(--sidebar-w);
+            background: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            transition: width var(--transition);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        body.sidebar-collapsed #sidebar {
+            width: var(--sidebar-w-closed);
+        }
+
+        /* Logo / brand area */
+        .sidebar-header {
+            height: var(--header-h);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            gap: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .brand-icon {
+            width: 28px; height: 28px;
+            background: var(--accent);
+            border-radius: 7px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            font-family: 'DM Mono', monospace;
+        }
+
+        .brand-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: opacity var(--transition);
+        }
+
+        body.sidebar-collapsed .brand-name { opacity: 0; pointer-events: none; }
+
+        /* Toggle button */
+        #sidebarToggle {
+            margin-left: auto;
+            flex-shrink: 0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            width: 28px; height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 6px;
+            transition: background var(--transition), color var(--transition), transform var(--transition);
+        }
+        #sidebarToggle:hover { background: var(--bg-sidebar-hover); color: var(--text-primary); }
+        body.sidebar-collapsed #sidebarToggle { transform: rotate(180deg); }
+
+        /* Nav */
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 8px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .nav-section-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 8px 10px 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: opacity var(--transition);
+        }
+        body.sidebar-collapsed .nav-section-label { opacity: 0; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 10px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            transition: background var(--transition), color var(--transition);
+            white-space: nowrap;
+            position: relative;
+            margin-bottom: 2px;
+        }
+        .nav-item:hover {
+            background: var(--bg-sidebar-hover);
+            color: var(--text-primary);
+        }
+        .nav-item.active {
+            background: var(--bg-active);
+            color: #fff;
+        }
+        .nav-item .nav-icon {
+            width: 20px; height: 20px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+        }
+        .nav-item .nav-label {
+            transition: opacity var(--transition);
+            overflow: hidden;
+        }
+        body.sidebar-collapsed .nav-item .nav-label { opacity: 0; }
+
+        /* Tooltip on collapse */
+        body.sidebar-collapsed .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: calc(var(--sidebar-w-closed) + 8px);
+            background: #1c1f2b;
+            color: #f8fafc;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .15s;
+            box-shadow: 0 4px 12px rgba(0,0,0,.3);
+        }
+        body.sidebar-collapsed .nav-item:hover::after { opacity: 1; }
+
+        /* Sidebar footer */
+        .sidebar-footer {
+            padding: 12px 8px;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .user-avatar {
+            width: 30px; height: 30px;
+            background: #334155;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+        .user-info { transition: opacity var(--transition); }
+        .user-info .user-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+        .user-info .user-role { font-size: 11px; color: var(--text-muted); }
+        body.sidebar-collapsed .user-info { opacity: 0; }
+
+        /* ── Main layout ── */
+        #layout {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            transition: margin-left var(--transition);
+            min-height: 100vh;
+        }
+        body.sidebar-collapsed #layout { margin-left: var(--sidebar-w-closed); }
+
+        /* Top bar */
+        #topbar {
+            height: var(--header-h);
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .page-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-body);
+        }
+        .breadcrumb {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-left: 4px;
+        }
+
+        /* Content */
+        #main-content {
+            flex: 1;
+            padding: 28px 32px;
+        }
+
+        /* ── Scrollbar ── */
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: #2a2f3e; border-radius: 99px; }
+    </style>
+</head>
+<body id="pageBody">
+    <form id="masterForm" runat="server">
+
+        <!-- ░░ SIDEBAR ░░ -->
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-icon">A</div>
+                <span class="brand-name">MyApp</span>
+                <button type="button" id="sidebarToggle" title="Toggle sidebar">
+                    <!-- chevrons-left icon -->
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">Main</div>
+
+                <a href="Default.aspx" class="nav-item" data-tooltip="Dashboard">
+                    <span class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+
+                <a href="Default1.aspx" class="nav-item" data-tooltip="Page 1">
+                    <span class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Page 1</span>
+                </a>
+
+                <a href="Default2.aspx" class="nav-item" data-tooltip="Page 2">
+                    <span class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Page 2</span>
+                </a>
+
+                <a href="Default3.aspx" class="nav-item" data-tooltip="Page 3">
+                    <span class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Page 3</span>
+                </a>
+
+                <a href="Default4.aspx" class="nav-item" data-tooltip="Page 4">
+                    <span class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Page 4</span>
+                </a>
+
+                <div class="nav-section-label" style="margin-top:12px;">Settings</div>
+
+                <a href="#" class="nav-item" data-tooltip="Settings">
+                    <span class="nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+                        </svg>
+                    </span>
+                    <span class="nav-label">Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-avatar">U</div>
+                <div class="user-info">
+                    <div class="user-name">User Name</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ░░ MAIN AREA ░░ -->
+        <div id="layout">
+            <header id="topbar">
+                <span class="page-title" id="pageTitle">Dashboard</span>
+                <span class="breadcrumb" id="pageBreadcrumb">/ Home</span>
+            </header>
+
+            <main id="main-content">
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </main>
+        </div>
+
+    </form>
+
+    <script>
+        // ── Sidebar toggle with localStorage persistence ──
+        const body    = document.getElementById('pageBody');
+        const toggle  = document.getElementById('sidebarToggle');
+        const STORAGE_KEY = 'sidebarCollapsed';
+
+        function applyState(collapsed) {
+            body.classList.toggle('sidebar-collapsed', collapsed);
+        }
+
+        // Restore saved state
+        applyState(localStorage.getItem(STORAGE_KEY) === 'true');
+
+        toggle.addEventListener('click', () => {
+            const isNowCollapsed = !body.classList.contains('sidebar-collapsed');
+            applyState(isNowCollapsed);
+            localStorage.setItem(STORAGE_KEY, isNowCollapsed);
+        });
+
+        // ── Active link highlighting ──
+        const currentPage = window.location.pathname.split('/').pop().toLowerCase();
+        document.querySelectorAll('.nav-item').forEach(link => {
+            const href = link.getAttribute('href').toLowerCase();
+            if (href === currentPage || (currentPage === '' && href === 'default.aspx')) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

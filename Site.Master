@@ -1,0 +1,192 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="EHS_Construction_Management_System.SiteMaster" %>
+
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title>EHS Construction Management System</title>
+
+    <link href="Content/select2.min.css" rel="stylesheet" type="text/css" />
+    <script src="Scripts/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <script src="Scripts/select2.min.js" type="text/javascript"></script>
+
+    <style>
+        .main-wrapper {
+            width: 95%;
+            margin: 20px auto;
+        }
+
+        /* Master Tab Menu Bar Styling Layout */
+        .tab-menu {
+            display: flex;
+            list-style: none;
+            padding: 0;
+            margin: 0 0 20px 0;
+            border-bottom: 2px solid #2C3E50;
+            width: 100%;
+        }
+
+        .tab-item {
+            flex: 1;
+            max-width: 180px;
+            margin-right: 4px;
+        }
+
+        .tab-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 38px;
+            padding: 4px 8px;
+            text-decoration: none;
+            color: #7F8C8D;
+            background: #ECF0F1;
+            font-family: Tahoma;
+            font-weight: lighter;
+            font-size: 12px;
+            text-align: center;
+            white-space: normal;
+            word-break: break-word;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid #BDC3C7;
+            border-bottom: none;
+        }
+
+            .tab-link:hover {
+                background: #BDC3C7;
+                color: black;
+            }
+
+        .tab-active {
+            background: #2C3E50 !important;
+            color: white !important;
+            border: 1px solid #2C3E50;
+            border-bottom: none;
+        }
+
+        .sub-link {
+            text-decoration: none;
+            color: #2980B9;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 6px 12px;
+            background: #FFFFFF;
+            border: 1px solid #D2D6DC;
+            border-radius: 4px;
+        }
+
+            .sub-link:hover {
+                background: #E5E7EB;
+                color: #1A5276;
+            }
+
+        .sub-active {
+            background: #27AE60 !important;
+            color: white !important;
+            border-color: #27AE60;
+        }
+
+        .form-container {
+            padding: 15px;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+        }
+
+        .Grid {
+            border: 1px solid #BDC3C7;
+            text-align: left;
+            font-size: 16px;
+        }
+
+        /* Adds a soft highlight shade when the cursor hovers over a data entry line */
+.Grid tr:hover {
+    background-color: #F8FAFC !important;
+}
+
+/* Centers radio buttons and adds breathing room inside the checkbox cells */
+.Grid td input[type="radio"] {
+    cursor: pointer;
+    transform: scale(1.15); /* Makes the radio button circle slightly larger and easier to click */
+    margin-top: 4px;
+}
+
+        /* Creates a clean, bounded scroll window */
+        .grid-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            border: 1px solid #E2E8F0;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        /* Freezes targeted columns on the left during horizontal scrolling */
+        .frozen-column {
+            position: sticky;
+            left: 0;
+            background-color: #F8FAFC !important; /* Slight tint so users see it is fixed */
+            z-index: 2;
+            box-shadow: 2px 0px 5px rgba(0,0,0,0.1); /* Adds a nice separation line */
+        }
+
+        /* Adjust the second frozen column offset if necessary */
+        th.frozen-column:nth-child(2), td.frozen-column:nth-child(2) {
+            left: 35px; /* Pushes the PMA column right past the 'No' column width */
+        }
+    </style>
+
+    <script type="text/javascript">
+        function initSearchableDropdowns() {
+            if (typeof $.fn.select2 === 'function') {
+                $('.searchable-company').select2({
+                    placeholder: "-- Search Company --",
+                    allowClear: true,
+                    width: '100%'
+                });
+            }
+        }
+        $(document).ready(function () { initSearchableDropdowns(); });
+
+        // Keeps select2 active across all nested grid additions postbacks
+        var prm = Sys.WebForms.PageRequestManager.getInstance();
+        if (prm) {
+            prm.add_endRequest(function () { initSearchableDropdowns(); });
+        }
+    </script>
+
+    <asp:ContentPlaceHolder ID="HeadContent" runat="server"></asp:ContentPlaceHolder>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+
+        <div>
+            <h2>EHS Construction Management System</h2>
+
+            <ul class="tab-menu">
+                <!-- ADD CLASS="TAB-ITEM" TO ALL LI TAGS BELOW -->
+                <li class="tab-item"><a id="navPatrol" runat="server" href="Default4.aspx">Daily Safety Patrol Result</a></li>
+                <li class="tab-item"><a id="navMachinery" runat="server" href="ScissorLift.aspx">High Risk Machinery & Equipment List</a></li>
+                <li class="tab-item"><a id="navActivity" runat="server" href="Default6.aspx">Special Activity List</a></li>
+                <li class="tab-item"><a id="navPenalty" runat="server" href="Default7.aspx">Record of Safety Penalty</a></li>
+            </ul>
+
+            <!-- Equipment List for Tab 2 -->
+            <asp:Panel ID="pnlSubMachineryMenu" runat="server" Visible="false" Style="background: #F4F6F9; padding: 10px; border-radius: 4px; margin-bottom: 20px; border-left: 5px solid #27AE60; display: flex; flex-wrap: wrap; gap: 8px;">
+                <strong style="padding-top: 6px; font-size: 14px; color: #2C3E50;">Equipment List: </strong>&nbsp;
+                <a id="subScissor" runat="server" href="ScissorLift.aspx" class="sub-link">Scissor Lift</a>
+                <a id="subForklift" runat="server" href="Forklift.aspx" class="sub-link">Forklift</a>
+                <a id="subBoomLift" runat="server" href="BomLift.aspx" class="sub-link">Bom Lift</a>
+                <a id="subSkyLift" runat="server" href="SkyLift.aspx" class="sub-link">Sky Lift</a>
+                <a id="subMobileCrane" runat="server" href="MobileCrane.aspx" class="sub-link">Mobile Crane</a>
+                <a id="subBackhoe" runat="server" href="Backhoe.aspx" class="sub-link">Backhoe</a>
+                <a id="subRoller" runat="server" href="Roller.aspx" class="sub-link">Compact Roller</a>
+                <a id="subScaffold" runat="server" href="Scaffold.aspx" class="sub-link">Scaffolding</a>
+            </asp:Panel>
+            <div>
+                <!-- Content form grids embed right inside here -->
+                <asp:ContentPlaceHolder ID="MainContent" runat="server"></asp:ContentPlaceHolder>
+            </div>
+        </div>
+    </form>
+</body>
+</html>
